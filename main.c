@@ -16,6 +16,7 @@
 #include <string.h>
 #include <limits.h>
 #include "listaarq.h"
+#include "listaind.h"
 
 #define TAMANHO_PAGINA 16000
 #define TAMANHO_REGISTRO 80
@@ -2130,6 +2131,19 @@ void opc10(char * comando) {
  * Função Principal
  */
 int main() {
+    
+    LISTAINDICE * lista = listaIndCriar();
+    
+    listaIndInserirOrdenado(lista,"Maria",10);
+    listaIndInserirOrdenado(lista,"Beatriz",15);
+    listaIndInserirOrdenado(lista,"Maria",5);
+    listaIndInserirOrdenado(lista,"Beatriz",8);
+    listaIndInserirOrdenado(lista,"Maria",1);
+    
+    listaIndImprimir(lista);
+    
+    exit(0);
+    
     /*
         LISTA *lista = listaCriar();
 

@@ -5,11 +5,13 @@
                    displayName="Arquivos de Cabeçalho"
                    projectFiles="true">
       <itemPath>listaarq.h</itemPath>
+      <itemPath>listaind.h</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Arquivos de Código-Fonte"
                    projectFiles="true">
       <itemPath>listaarq.c</itemPath>
+      <itemPath>listaind.c</itemPath>
       <itemPath>main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -48,6 +50,10 @@
       </item>
       <item path="listaarq.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="listaind.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="listaind.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
@@ -78,6 +84,10 @@
       <item path="listaarq.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="listaarq.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="listaind.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="listaind.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
