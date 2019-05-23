@@ -31,7 +31,7 @@ LISTAINDICE * listaIndCriar(void);
 void listaIndApagar(LISTAINDICE *lista);
 int listaIndInserirOrdenado(LISTAINDICE * lista, char chave[28], int RRN);
 int listaIndInserirFim(LISTAINDICE * lista, char chave[28], int RRN);
-int listaIndRemover(LISTAINDICE *lista, char chave[28], int RRN);
+int listaIndRemover(LISTAINDICE *lista, int RRN);
 void listaIndImprimir(LISTAINDICE *lista);
 
 #endif /* LISTAIND_H */

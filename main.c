@@ -2131,19 +2131,32 @@ void opc10(char * comando) {
  * Função Principal
  */
 int main() {
-    
+
     LISTAINDICE * lista = listaIndCriar();
-    
-    listaIndInserirOrdenado(lista,"Maria",10);
-    listaIndInserirOrdenado(lista,"Beatriz",15);
-    listaIndInserirOrdenado(lista,"Maria",5);
-    listaIndInserirOrdenado(lista,"Beatriz",8);
-    listaIndInserirOrdenado(lista,"Maria",1);
-    
+
+    listaIndInserirOrdenado(lista, "Maria", 10);
+    listaIndInserirOrdenado(lista, "Beatriz", 15);
+    listaIndInserirOrdenado(lista, "Maria", 5);
+    listaIndInserirOrdenado(lista, "Beatriz", 8);
+    listaIndInserirOrdenado(lista, "Maria", 1);
+
+    listaIndInserirFim(lista, "Ana", 10);
+    listaIndInserirFim(lista, "Amanda", 10);
+
+    listaIndInserirOrdenado(lista, "Amanda", 3);
+    listaIndInserirFim(lista, "Barbara", 30);
+
     listaIndImprimir(lista);
-    
+
+    printf("\n");
+
+    listaIndRemover(lista, 3);
+    listaIndRemover(lista, 30);
+
+    listaIndImprimir(lista);
+
     exit(0);
-    
+
     /*
         LISTA *lista = listaCriar();
 
