@@ -1932,40 +1932,42 @@ void opc9(char * comando) {
                 if (lerLinha(arq1, RRN1, &removido1, &nroInscricao1, &nota1, data1, &tamanhoCidade1, cidade1, &tamanhoEscola1, nomeEscola1)) {
 
 
-                }
-
-                if (lerLinha(arq2, RRN2, &removido2, &nroInscricao2, &nota2, data2, &tamanhoCidade2, cidade2, &tamanhoEscola2, nomeEscola2)) {
 
 
-                }
+                    if (lerLinha(arq2, RRN2, &removido2, &nroInscricao2, &nota2, data2, &tamanhoCidade2, cidade2, &tamanhoEscola2, nomeEscola2)) {
 
-                if (removido1 == REMOVIDO) {
-                    RRN1++;
-                }
-                if (removido2 == REMOVIDO) {
-                    RRN2++;
-                }
 
-                if (removido1 == NAO_REMOVIDO && removido2 == NAO_REMOVIDO) {
-                    if (nroInscricao1 < nroInscricao2) {
 
-                        escreverDadosEmArquivo(arqSaida, nroInscricao1, nota1, data1, tamanhoCidade1, cidade1, tamanhoEscola1, nomeEscola1);
 
-                        RRN1++;
+                        if (removido1 == REMOVIDO) {
+                            RRN1++;
+                        }
+                        if (removido2 == REMOVIDO) {
+                            RRN2++;
+                        }
 
-                    } else if (nroInscricao1 == nroInscricao2) {
+                        if (removido1 == NAO_REMOVIDO && removido2 == NAO_REMOVIDO) {
+                            if (nroInscricao1 < nroInscricao2) {
 
-                        escreverDadosEmArquivo(arqSaida, nroInscricao1, nota1, data1, tamanhoCidade1, cidade1, tamanhoEscola1, nomeEscola1);
+                                escreverDadosEmArquivo(arqSaida, nroInscricao1, nota1, data1, tamanhoCidade1, cidade1, tamanhoEscola1, nomeEscola1);
 
-                        RRN1++;
-                        RRN2++;
+                                RRN1++;
 
-                    } else {
+                            } else if (nroInscricao1 == nroInscricao2) {
 
-                        escreverDadosEmArquivo(arqSaida, nroInscricao2, nota2, data2, tamanhoCidade2, cidade2, tamanhoEscola2, nomeEscola2);
+                                escreverDadosEmArquivo(arqSaida, nroInscricao1, nota1, data1, tamanhoCidade1, cidade1, tamanhoEscola1, nomeEscola1);
 
-                        RRN2++;
+                                RRN1++;
+                                RRN2++;
 
+                            } else if (nroInscricao1 > 0 && nroInscricao2 > 0) {
+
+                                escreverDadosEmArquivo(arqSaida, nroInscricao2, nota2, data2, tamanhoCidade2, cidade2, tamanhoEscola2, nomeEscola2);
+
+                                RRN2++;
+
+                            }
+                        }
                     }
                 }
 
@@ -2082,35 +2084,36 @@ void opc10(char * comando) {
                 if (lerLinha(arq1, RRN1, &removido1, &nroInscricao1, &nota1, data1, &tamanhoCidade1, cidade1, &tamanhoEscola1, nomeEscola1)) {
 
 
-                }
-
-                if (lerLinha(arq2, RRN2, &removido2, &nroInscricao2, &nota2, data2, &tamanhoCidade2, cidade2, &tamanhoEscola2, nomeEscola2)) {
 
 
-                }
+                    if (lerLinha(arq2, RRN2, &removido2, &nroInscricao2, &nota2, data2, &tamanhoCidade2, cidade2, &tamanhoEscola2, nomeEscola2)) {
 
-                if (removido1 == REMOVIDO) {
-                    RRN1++;
-                }
-                if (removido2 == REMOVIDO) {
-                    RRN2++;
-                }
 
-                if (removido1 == NAO_REMOVIDO && removido2 == NAO_REMOVIDO) {
-                    if (nroInscricao1 < nroInscricao2) {
-                        RRN1++;
-                    } else if (nroInscricao1 == nroInscricao2) {
 
-                        escreverDadosEmArquivo(arqSaida, nroInscricao1, nota1, data1, tamanhoCidade1, cidade1, tamanhoEscola1, nomeEscola1);
 
-                        RRN1++;
-                        RRN2++;
+                        if (removido1 == REMOVIDO) {
+                            RRN1++;
+                        }
+                        if (removido2 == REMOVIDO) {
+                            RRN2++;
+                        }
 
-                    } else {
-                        RRN2++;
+                        if (removido1 == NAO_REMOVIDO && removido2 == NAO_REMOVIDO) {
+                            if (nroInscricao1 < nroInscricao2) {
+                                RRN1++;
+                            } else if (nroInscricao1 == nroInscricao2) {
+
+                                escreverDadosEmArquivo(arqSaida, nroInscricao1, nota1, data1, tamanhoCidade1, cidade1, tamanhoEscola1, nomeEscola1);
+
+                                RRN1++;
+                                RRN2++;
+
+                            } else {
+                                RRN2++;
+                            }
+                        }
                     }
                 }
-
             }
 
             fclose(arq1);

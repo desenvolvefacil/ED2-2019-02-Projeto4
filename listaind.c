@@ -41,7 +41,7 @@ void listaIndApagar(LISTAINDICE *lista) {
 int comparar(NOIND * n1, NOIND * n2) {
     int ret = 0;
 
-    ret = strncmp(n1->chave, n2->chave, 28);
+    ret = strncasecmp(n1->chave, n2->chave, 28);
 
     //se for a mesma chave retorna o rrn menor
     if (ret == 0) {
