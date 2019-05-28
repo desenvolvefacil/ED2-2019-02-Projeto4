@@ -293,9 +293,9 @@ int escreverIndicie(char * nomeArquivo, LISTAINDICE * lista) {
             aux = aux->proximo;
         }
 
-
         //seta o status para fechado
         rewind(wbFile);
+
         status = ARQUIVO_FECHADO_ESCRITA;
         fwrite(&status, 1, 1, wbFile);
 
@@ -2191,7 +2191,8 @@ void opc10(char * comando) {
 
 /**
  * Cria o arquivo de indice através de um arquivo de dados existente
- * Entrada Modelo:
+ * 
+Entrada Modelo:
   
 11 arquivoEntrada.bin arquivoIndice.bin
  
@@ -2254,6 +2255,14 @@ void opc11(char * comando) {
     }
 }
 
+/**
+ * Realiza busca a partir de um arquivo de indice
+ Entrada Modelo:
+  
+12 arquivoEntrada.bin arquivoIndice.bin nomeEscola RITA DE MACEDO BARRETO
+ 
+ * @param comando
+ */
 void opc12(char * comando) {
 
 }
@@ -2400,6 +2409,10 @@ int main() {
         case 11:
         {
             opc11(comando);
+        }
+        case 12:
+        {
+            opc12(comando);
         }
         case 99:
         {
