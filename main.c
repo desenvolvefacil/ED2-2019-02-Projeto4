@@ -252,7 +252,7 @@ void escreverCabecalho(FILE * wbFile) {
  * Recebe uma lista e cria o arquivo de indice
  * @param nomeArquivo
  * @param lista
- * @return 
+ * @return 1 se criado corretamente 0 em caso de erro
  */
 int escreverIndicie(char * nomeArquivo, LISTAINDICE * lista) {
 
@@ -2183,21 +2183,48 @@ void opc10(char * comando) {
     }
 }
 
+/**
+ * Cria o arquivo de indice através de um arquivo de dados existente
+ * Entrada Modelo:
+  
+11 arquivoEntrada.bin arquivoIndice.bin
+ 
+ * @param comando
+ */
 void opc11(char * comando) {
+    char * nomeArqEntrada = strsep(&comando, " ");
+    char * nomeArquivoIndice = strsep(&comando, " ");
 
+
+
+    LISTAINDICE * lista = listaIndCriar();
+
+    
+    //le o arquivo de dados e insere na lista ordenado
+    
+    
+
+    if (escreverIndicie(nomeArquivoIndice, lista)) {
+
+        listaIndApagar(lista);
+
+        binarioNaTela(nomeArquivoIndice);
+    } else {
+        printf(MSG_ERRO);
+    }
 }
 
 /*
  * Função Principal
  */
 int main() {
-    LISTAINDICE * lista = listaIndCriar();
+    /*LISTAINDICE * lista = listaIndCriar();
 
     listaIndInserirOrdenado(lista, "Maria", 10);
     listaIndInserirOrdenado(lista, "Beatriz", 15);
     escreverIndicie("teste.bin", lista);
 
-    exit(0);
+    exit(0);*/
     /*
         LISTAINDICE * lista = listaIndCriar();
 
@@ -2328,7 +2355,7 @@ int main() {
         }
         case 11:
         {
-
+            opc11(comando);
         }
         case 99:
         {
