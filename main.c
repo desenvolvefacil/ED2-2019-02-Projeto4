@@ -2195,20 +2195,54 @@ void opc11(char * comando) {
     char * nomeArqEntrada = strsep(&comando, " ");
     char * nomeArquivoIndice = strsep(&comando, " ");
 
-
-
     LISTAINDICE * lista = listaIndCriar();
 
-    
     //le o arquivo de dados e insere na lista ordenado
-    
-    
+    FILE * arquivoEntrada = abrirArquivoBinarioLeitura(nomeArqEntrada);
 
-    if (escreverIndicie(nomeArquivoIndice, lista)) {
 
-        listaIndApagar(lista);
+    if (arquivoEntrada) {
 
-        binarioNaTela(nomeArquivoIndice);
+        int RRN = 0;
+
+        while (!feof(arquivoEntrada)) {
+            char removido;
+            //int encadeamento;
+            int nroInscricao = 0;
+            double nota = -1;
+            char data[11] = "\0";
+            //data[10] = '\0';
+
+            char cidade[100] = "\0"; // = NULL;
+            char nomeEscola[100] = "\0"; // = NULL;
+
+            int tamanhoCidade = 0;
+            int tamanhoEscola = 0;
+
+            //se conseguiu ler a linha
+            if (lerLinha(arquivoEntrada, RRN, &removido, &nroInscricao, &nota, data, &tamanhoCidade, cidade, &tamanhoEscola, nomeEscola)) {
+                //se o registro não esta removido logicamente
+                if (removido == NAO_REMOVIDO && tamanhoEscola > 0) {
+                    //listaArqInserirInicio(lista, nroInscricao, nota, data, tamanhoCidade, cidade, tamanhoEscola, nomeEscola);
+                    listaIndInserirOrdenado(lista, nomeEscola, RRN);
+                }
+            }
+
+            RRN++;
+        }
+
+        //fecha o arquivo
+        fclose(arquivoEntrada);
+
+
+        if (escreverIndicie(nomeArquivoIndice, lista)) {
+
+            listaIndApagar(lista);
+
+            binarioNaTela(nomeArquivoIndice);
+        } else {
+            printf(MSG_ERRO);
+        }
     } else {
         printf(MSG_ERRO);
     }
