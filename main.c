@@ -293,6 +293,12 @@ int escreverIndicie(char * nomeArquivo, LISTAINDICE * lista) {
             aux = aux->proximo;
         }
 
+
+        //seta o status para fechado
+        rewind(wbFile);
+        status = ARQUIVO_FECHADO_ESCRITA;
+        fwrite(&status, 1, 1, wbFile);
+
         fclose(wbFile);
         return 1;
     }
@@ -2246,6 +2252,10 @@ void opc11(char * comando) {
     } else {
         printf(MSG_ERRO);
     }
+}
+
+void opc12(char * comando) {
+
 }
 
 /*
