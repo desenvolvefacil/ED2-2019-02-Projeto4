@@ -19,7 +19,8 @@
 #include "listaind.h"
 
 #define TAMANHO_PAGINA 16000
-#define TAMANHO_REGISTRO 80
+#define TAMANHO_REGISTRO_DADO 80
+#define TAMANHO_CHAVE_BUSCA 28
 #define NOME_ARQUIVO_WB_SAVE "arquivoTrab1si.bin"
 #define REMOVIDO '*'
 #define NAO_REMOVIDO '-'
@@ -54,7 +55,7 @@ void escreverDadosEmArquivo(FILE * fileWb, int nroInscricao, double nota, char *
     fwrite(&nroInscricao, sizeof (int), 1, fileWb);
 
     //grava no arquivo binario
-    fwrite(&nota, sizeof (nota), 1, fileWb);
+    fwrite(&nota, sizeof (int), 1, fileWb);
 
     //grava a data no arquivo binario
     if (strlen(data) > 0) {
@@ -106,7 +107,7 @@ void escreverDadosEmArquivo(FILE * fileWb, int nroInscricao, double nota, char *
     //for para setar @ nos bytes faltantes
     char arr = '@';
     int i;
-    for (i = totalBytes; i < TAMANHO_REGISTRO; i++) {
+    for (i = totalBytes; i < TAMANHO_REGISTRO_DADO; i++) {
         fwrite(&arr, 1, 1, fileWb);
     }
 
@@ -179,7 +180,7 @@ void escreverNoEmArquivo(FILE * wbFile, NOARQ * no) {
 
     char lixo = '@';
     //for para setar @ nos bytes faltantes
-    for (; totalBytes < TAMANHO_REGISTRO; totalBytes++) {
+    for (; totalBytes < TAMANHO_REGISTRO_DADO; totalBytes++) {
         fwrite(&lixo, 1, 1, wbFile);
     }
 
@@ -245,6 +246,58 @@ void escreverCabecalho(FILE * wbFile) {
 
 
     //break;
+}
+
+/**
+ * Recebe uma lista e cria o arquivo de indice
+ * @param nomeArquivo
+ * @param lista
+ * @return 
+ */
+int escreverIndicie(char * nomeArquivo, LISTAINDICE * lista) {
+
+    FILE * wbFile = fopen(nomeArquivo, MODO_ESCRITA);
+
+    if (wbFile) {
+        char status = ARQUIVO_ABERTO_ESCRITA;
+        fwrite(&status, 1, 1, wbFile);
+
+        int nroRegistros = lista->tamanho;
+        fwrite(&nroRegistros, sizeof (int), 1, wbFile);
+
+        int i, total = TAMANHO_PAGINA - 5;
+        char lixo = '@';
+
+        //comprela o registro de cabeçalho com @
+        for (i = 0; i < total; i++) {
+            fwrite(&lixo, 1, 1, wbFile);
+        }
+
+        //escreve os dados
+        NOIND * aux = lista->inicio;
+
+        while (aux != NULL) {
+
+            int tamanho = strlen(aux->chave) + 1;
+
+            fwrite(&aux->chave, tamanho, 1, wbFile);
+
+            //completa o espaço com @
+            for (; tamanho < TAMANHO_CHAVE_BUSCA; tamanho++) {
+                fwrite(&lixo, 1, 1, wbFile);
+            }
+
+            //salva o RRN da chave de busca
+            fwrite(&aux->RRN, sizeof (int), 1, wbFile);
+
+            aux = aux->proximo;
+        }
+
+        fclose(wbFile);
+        return 1;
+    }
+
+    return 0;
 }
 
 /**
@@ -332,7 +385,7 @@ int lerLinha(FILE * fileWb, int RRN, char * removido, int * nroInscricao, double
     char auxTagCampo;
 
     //posicao do proximo registro
-    int pular = TAMANHO_PAGINA + RRN * TAMANHO_REGISTRO;
+    int pular = TAMANHO_PAGINA + RRN * TAMANHO_REGISTRO_DADO;
 
     //posicao atual do ponteiro no arquivo
     int posAtual = ftell(fileWb);
@@ -448,7 +501,7 @@ FILE * abrirArquivoBinarioLeitura(char * nomeArquivo) {
 FILE * abrirArquivoBinarioEscritra(char * nomeArquivo, char * modo) {
     FILE * file = fopen(nomeArquivo, modo);
 
-    if (file) {
+    if (strncasecmp(modo, MODO_EDICAO, 3) && file) {
         char status = ARQUIVO_ABERTO_ESCRITA;
 
         //le o primeiro char para verificar a integridade
@@ -459,7 +512,7 @@ FILE * abrirArquivoBinarioEscritra(char * nomeArquivo, char * modo) {
             fclose(file);
             file = NULL;
         } else {
-            //volta o curtos pro inicio do arquivo
+            //volta o cursor pro inicio do arquivo
             fseek(file, -1, SEEK_CUR);
             //seta o flag de arquivo aberto pra escrita
             char status = ARQUIVO_ABERTO_ESCRITA;
@@ -724,7 +777,7 @@ void opc1(char * comando) {
 
 
                     //escreve o lixo para completar o registro
-                    int i, total = TAMANHO_REGISTRO - totalBytes;
+                    int i, total = TAMANHO_REGISTRO_DADO - totalBytes;
                     //cria a variavel com tamanho que falta
                     char * lixo = calloc(total, 1);
                     //for para setar @ nos bytes faltantes
@@ -813,7 +866,7 @@ void opc2(char * comando) {
 
 
         //Calcula qtas paginas foram acessadas
-        int totalBytes = TAMANHO_REGISTRO * (vez);
+        int totalBytes = TAMANHO_REGISTRO_DADO * (vez);
 
         int totalPaginasAcessadas = totalBytes / TAMANHO_PAGINA;
 
@@ -932,7 +985,7 @@ void opc3(char * comando) {
             if (imprimiu) {
                 //Calcula qtas paginas foram acessadas
                 //soma uma pagina para contar o cabecallho
-                int totalBytes = TAMANHO_REGISTRO * (vez - 1) + TAMANHO_PAGINA;
+                int totalBytes = TAMANHO_REGISTRO_DADO * (vez - 1) + TAMANHO_PAGINA;
 
                 int totalPaginasAcessadas = totalBytes / TAMANHO_PAGINA;
 
@@ -1161,7 +1214,7 @@ void opc5(char * comando) {
                         //remove o registro logicamente
 
                         //posicao do proximo registro
-                        int pular = TAMANHO_PAGINA + RRN * TAMANHO_REGISTRO;
+                        int pular = TAMANHO_PAGINA + RRN * TAMANHO_REGISTRO_DADO;
 
                         //posicao atual do ponteiro no arquivo
                         int posAtual = ftell(fileWb);
@@ -1182,7 +1235,7 @@ void opc5(char * comando) {
                         //escreve @ nos campos restantes
                         int i;
                         //status 1 + encadeamento 4 = 5
-                        for (i = 5; i < TAMANHO_REGISTRO; i++) {
+                        for (i = 5; i < TAMANHO_REGISTRO_DADO; i++) {
                             char arr = '@';
                             fwrite(&arr, sizeof (char), 1, fileWb);
                         }
@@ -1288,7 +1341,7 @@ void opc6(char * comando) {
                 fseek(fileWb, 0, SEEK_END);
             } else {
                 //pega a posicao do registro removido
-                int posicao = topoPilha * TAMANHO_REGISTRO + TAMANHO_PAGINA;
+                int posicao = topoPilha * TAMANHO_REGISTRO_DADO + TAMANHO_PAGINA;
 
                 //soma 1 do byte de statys
                 fseek(fileWb, posicao + 1, SEEK_SET);
@@ -1444,7 +1497,7 @@ void opc6(char * comando) {
             //for para setar @ nos bytes faltantes
             char arr = '@';
             int i;
-            for (i = totalBytes; i < TAMANHO_REGISTRO; i++) {
+            for (i = totalBytes; i < TAMANHO_REGISTRO_DADO; i++) {
                 fwrite(&arr, 1, 1, fileWb);
             }
 
@@ -1546,7 +1599,7 @@ void opc7(char * comando) {
                 if (removido == NAO_REMOVIDO) {
 
                     //inicio do arquivo
-                    int inicioRegistro = TAMANHO_PAGINA + TAMANHO_REGISTRO * RRN;
+                    int inicioRegistro = TAMANHO_PAGINA + TAMANHO_REGISTRO_DADO * RRN;
                     //soma os bytes de status(1) e encadeamento(4)
                     inicioRegistro += 1 + 4;
 
@@ -1688,7 +1741,7 @@ void opc7(char * comando) {
                             int j;
 
                             //completa com nulos caso 
-                            for (j = bytes; j < TAMANHO_REGISTRO; j++) {
+                            for (j = bytes; j < TAMANHO_REGISTRO_DADO; j++) {
                                 fwrite(&arr, 1, 1, fileWb);
                             }
                         }
@@ -1748,7 +1801,7 @@ void opc7(char * comando) {
                         int j;
 
                         //completa com nulos caso 
-                        for (j = bytes; j < TAMANHO_REGISTRO; j++) {
+                        for (j = bytes; j < TAMANHO_REGISTRO_DADO; j++) {
                             fwrite(&arr, 1, 1, fileWb);
                         }
 
@@ -2130,10 +2183,21 @@ void opc10(char * comando) {
     }
 }
 
+void opc11(char * comando) {
+
+}
+
 /*
  * Função Principal
  */
 int main() {
+    LISTAINDICE * lista = listaIndCriar();
+
+    listaIndInserirOrdenado(lista, "Maria", 10);
+    listaIndInserirOrdenado(lista, "Beatriz", 15);
+    escreverIndicie("teste.bin", lista);
+
+    exit(0);
     /*
         LISTAINDICE * lista = listaIndCriar();
 
@@ -2261,6 +2325,10 @@ int main() {
         {
             opc10(comando);
             break;
+        }
+        case 11:
+        {
+
         }
         case 99:
         {
