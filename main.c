@@ -1157,14 +1157,16 @@ nomeEscola "DONIZETTI TAVARES DE LI"
 
  * @param comando
  */
-void opc5(char * comando) {
+void opc5(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIteracoes) {
+    //se tem lista é uma chamada da função 13
+    //entao o nome arquivo e numero de iteracoes ja vem com valores
+    if (!lista) {
+        nomeArquivo = strsep(&comando, " ");
 
-    char * nomeArquivo = strsep(&comando, " ");
+        numeroIteracoes = atoi(strsep(&comando, "\0"));
+    }
 
     int erro = 0;
-
-    int numeroIteracoes = 0;
-    numeroIteracoes = atoi(strsep(&comando, "\0"));
 
     FILE * fileWb = abrirArquivoBinarioEscritra(nomeArquivo, MODO_EDICAO);
 
@@ -2395,67 +2397,19 @@ void opc12(char * comando) {
     }
 }
 
+/**
+ * realiza a remoção de um registro e atualiza o indice
+ * @param comando
+ */
+void opc13(char * comando) {
+    
+}
+
 /*
  * Função Principal
  */
 int main() {
-    /*LISTAINDICE * lista = listaIndCriar();
 
-    listaIndInserirOrdenado(lista, "Maria", 10);
-    listaIndInserirOrdenado(lista, "Beatriz", 15);
-    escreverIndicie("teste.bin", lista);
-
-    exit(0);*/
-    /*
-        LISTAINDICE * lista = listaIndCriar();
-
-        listaIndInserirOrdenado(lista, "Maria", 10);
-        listaIndInserirOrdenado(lista, "Beatriz", 15);
-        listaIndInserirOrdenado(lista, "Maria", 5);
-        listaIndInserirOrdenado(lista, "Beatriz", 8);
-        listaIndInserirOrdenado(lista, "Maria", 1);
-
-        listaIndInserirFim(lista, "Ana", 10);
-        listaIndInserirFim(lista, "Amanda", 10);
-
-        listaIndInserirOrdenado(lista, "Amanda", 3);
-        listaIndInserirFim(lista, "Barbara", 30);
-
-        listaIndImprimir(lista);
-
-        printf("\n");
-
-        listaIndRemover(lista, 3);
-        listaIndRemover(lista, 30);
-
-        listaIndImprimir(lista);
-
-        exit(0);
-     */
-    /*
-        LISTA *lista = listaCriar();
-
-        listarInserirInicio(lista, 1, -1, "a", 1, "a", 1, "a");
-        listarInserirInicio(lista, 2, -1, "b", 2, "b", 2, "b");
-        listarInserirInicio(lista, 3, -1, "", 0, "", 0, "");
-        listarInserirInicio(lista, 4, -1, "", 0, "", 0, "");
-        listarInserirInicio(lista, 5, -1, "", 0, "", 0, "");
-        listarInserirInicio(lista, 6, -1, "", 0, "", 0, "");
-
-
-        listarImprimir(lista);
-
-        qsOrdernarLista(&lista->inicio);
-
-        listarImprimir(lista);
-
-        listarApagar(lista);
-
-        return 0;
-     */
-    /*char a='@';
-    printf("%02X ", a);
-    exit(0);*/
     //comando a ser lido
     char * comando = calloc(100, sizeof (char));
     //strcpy(comando,"3 arquivoTrab1si.bin nomeEscola FRANCISCO RIBEIRO CARRI\0");
@@ -2506,7 +2460,7 @@ int main() {
         }
         case 5:
         {
-            opc5(comando);
+            opc5(comando,NULL,"",0);
             break;
         }
         case 6:
@@ -2542,6 +2496,11 @@ int main() {
         case 12:
         {
             opc12(comando);
+            break;
+        }
+        case 13:
+        {
+            opc13(comando);
             break;
         }
         case 99:
