@@ -1315,6 +1315,10 @@ void opc5(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIte
                         fwrite(&topoPilha, sizeof (int), 1, fileWb);
 
 
+                        //se for uma chamada da funcao 13 esclui da lista
+                        if (lista) {
+                            listaIndRemover(lista,RRN);
+                        }
 
                         //verifica se deve parar
                         if (parar) {
@@ -1349,7 +1353,10 @@ void opc5(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIte
     if (erro) {
         printf(MSG_ERRO);
     } else {
-        binarioNaTela(nomeArquivo);
+        //imrpime somente se for chamada direta a 5, se for uma chamada da 13 nao imprime
+        if (!lista) {
+            binarioNaTela(nomeArquivo);
+        }
     }
 }
 
@@ -2392,6 +2399,8 @@ void opc12(char * comando) {
             printf(MSG_REGISTRO_INEXISTENTE);
         }
 
+        listaIndApagar(lista);
+        
     } else {
         printf(MSG_ERRO);
     }
@@ -2399,10 +2408,41 @@ void opc12(char * comando) {
 
 /**
  * realiza a remoção de um registro e atualiza o indice
+ * Entrada Modelo
+ * 
+13 file3.bin file3ind.bin 1
+cidade "Penha"
+
+
  * @param comando
  */
 void opc13(char * comando) {
-    
+    char * nomeArqEntrada = strsep(&comando, " ");
+    char * nomeArqIndice = strsep(&comando, " ");
+
+    FILE * arqIndice = abrirArquivoBinarioLeitura(nomeArqIndice);
+
+    if (arqIndice) {
+
+        int numeroRepeticos = atoi(strsep(&comando, "\0"));
+
+        LISTAINDICE * lista = carregarListaIndice(arqIndice);
+        fclose(arqIndice);
+
+        //realiza as operações no arquivo e na lista de indice
+        opc5("", lista, nomeArqEntrada, numeroRepeticos);
+
+
+        //escreve o novo arquivo de indice
+        escreverIndicie(nomeArqIndice, lista);
+
+        listaIndApagar(lista);
+        
+        binarioNaTela(nomeArqIndice);
+
+    } else {
+        printf(MSG_ERRO);
+    }
 }
 
 /*
@@ -2460,7 +2500,7 @@ int main() {
         }
         case 5:
         {
-            opc5(comando,NULL,"",0);
+            opc5(comando, NULL, "", 0);
             break;
         }
         case 6:
