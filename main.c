@@ -20,6 +20,7 @@
 
 #define TAMANHO_PAGINA 16000
 #define TAMANHO_REGISTRO_DADO 80
+#define TAMANHO_REGISTRO_INDICE 32
 #define TAMANHO_CHAVE_BUSCA 28
 #define NOME_ARQUIVO_WB_SAVE "arquivoTrab1si.bin"
 #define REMOVIDO '*'
@@ -29,6 +30,7 @@
 #define ARQUIVO_ABERTO_ESCRITA '0'
 #define ARQUIVO_FECHADO_ESCRITA '1'
 #define MSG_ERRO "Falha no processamento do arquivo."
+#define MSG_REGISTRO_INEXISTENTE "Registro inexistente."
 #define MODO_ESCRITA "wb"
 #define MODO_EDICAO "r+b"
 
@@ -337,6 +339,61 @@ void binarioNaTela(char *nomeArquivoBinario) {
 }
 
 /**
+ * carrega a lista de indice a partir de um arquivo
+ * @param arq
+ * @return lista carregada
+ */
+LISTAINDICE * carregarListaIndice(FILE * arq) {
+
+    if (arq) {
+
+        int totalRegistro = 0;
+        fread(&totalRegistro, sizeof (int), 1, arq);
+
+        LISTAINDICE * lista = listaIndCriar();
+
+        //int RRNIndice = 0;
+        int pular = 0;
+        int posAtual = 0;
+        char chave[28];
+        int RRNDado = 0;
+
+        //posicao do primeiro registro
+        pular = TAMANHO_PAGINA;
+
+        //posicao atual do ponteiro no arquivo
+        posAtual = ftell(arq);
+
+        //ajusta o tamanho do salto tirando o valor atual do ponteiro do registro a ser obtido
+        pular -= posAtual;
+
+        //tenta pular pra posição
+        int seek = fseek(arq, pular, SEEK_CUR);
+
+        //le o arquivo de indice pra cerregar os dados
+        while (!feof(arq)) {
+
+            if (fread(chave, 28, 1, arq)) {
+                if (fread(&RRNDado, sizeof (int), 1, arq)) {
+                    listaIndInserirFim(lista, chave, RRNDado);
+
+                    //RRNIndice++;
+                }
+            }
+
+        }
+
+        fclose(arq);
+
+        return lista;
+
+    } else {
+        return NULL;
+    }
+
+}
+
+/**
  * Recebe os dados de uma linha e imprime em tela
  * @param nroInscricao
  * @param nota
@@ -401,6 +458,8 @@ int lerLinha(FILE * fileWb, int RRN, char * removido, int * nroInscricao, double
 
     //tenta pular pra posição
     int seek = fseek(fileWb, pular, SEEK_CUR);
+
+    posAtual = ftell(fileWb);
 
     //fssek retorna 0 caso seja lido sem erros
     if (!seek) {
@@ -1001,7 +1060,7 @@ void opc3(char * comando) {
 
                 printf("Número de páginas de disco acessadas: %d", totalPaginasAcessadas);
             } else {
-                printf("Registro inexistente.");
+                printf(MSG_REGISTRO_INEXISTENTE);
             }
 
 
@@ -1059,10 +1118,10 @@ void opc4(char * comando) {
                     //2 cabcalho + seek direto pro registro
                     printf("Número de páginas de disco acessadas: 2");
                 } else {
-                    printf("Registro inexistente.");
+                    printf(MSG_REGISTRO_INEXISTENTE);
                 }
             } else {
-                printf("Registro inexistente.");
+                printf(MSG_REGISTRO_INEXISTENTE);
             }
 
 
@@ -2259,12 +2318,81 @@ void opc11(char * comando) {
  * Realiza busca a partir de um arquivo de indice
  Entrada Modelo:
   
-12 arquivoEntrada.bin arquivoIndice.bin nomeEscola RITA DE MACEDO BARRETO
- 
+12 file2.bin file2ind.bin nomeEscola "JACOMO STAVALE PROFESSO"
+12 file2.bin file2ind.bin nomeEscola "CORONEL CRISTIANO"
+12 file2.bin file2i.bin nomeEscola "JESUINO DE ARRUDA"
+
  * @param comando
  */
 void opc12(char * comando) {
+    char * nomeArqEntrada = strsep(&comando, " ");
+    char * nomeArqIndice = strsep(&comando, " ");
 
+    char * parametroNome = strsep(&comando, " ");
+    char * parametroValor = strsep(&comando, "\"");
+    if (strcmp(parametroValor, "") == 0) {
+        parametroValor = strsep(&comando, "\"");
+    }
+
+    FILE * arqEntrada = abrirArquivoBinarioLeitura(nomeArqEntrada);
+    FILE * arqIndice = abrirArquivoBinarioLeitura(nomeArqIndice);
+
+    if (arqEntrada && arqIndice) {
+
+        LISTAINDICE * lista = carregarListaIndice(arqIndice);
+
+        //500 registros de indice por pagina + 1 da pagina de cabecalho
+        int totalPaginasIndice = lista->tamanho / 500 + 1;
+        //caso tenha pagina que não esteja completamente cheia, soma tb
+        totalPaginasIndice += (lista->tamanho % 500 > 0) ? 1 : 0;
+
+        //começa contando com o arquivo de cabeçalho
+        int totalPaginaDados = 1;
+
+        //realiza a busca e imprime
+        NOIND * aux = lista->inicio;
+        while (aux != NULL && strncasecmp(aux->chave, parametroValor, 28) <= 0) {
+            if (strncasecmp(aux->chave, parametroValor, 28) == 0) {
+
+
+
+                char removido;
+                //int encadeamento;
+                int nroInscricao = 0;
+                double nota = -1;
+                char data[11] = "\0";
+                //data[10] = '\0';
+
+                char cidade[100] = "\0"; // = NULL;
+                char nomeEscola[100] = "\0"; // = NULL;
+
+                int tamanhoCidade = 0;
+                int tamanhoEscola = 0;
+
+                //se conseguiu ler a linha
+                if (lerLinha(arqEntrada, aux->RRN, &removido, &nroInscricao, &nota, data, &tamanhoCidade, cidade, &tamanhoEscola, nomeEscola)) {
+                    //se o registro não esta removido logicamente
+                    if (removido == NAO_REMOVIDO) {
+                        imprimirLinhaEmTela(nroInscricao, nota, data, cidade, nomeEscola);
+                        totalPaginaDados++;
+                    }
+                }
+
+            }
+            aux = aux->proximo;
+        }
+
+        //se encontrou algum dado correspondente
+        if (totalPaginaDados > 1) {
+            printf("Número de páginas de disco para carregar o arquivo de índice: %d\n", totalPaginasIndice);
+            printf("Número de páginas de disco para acessar o arquivo de dados: %d", totalPaginaDados);
+        } else {
+            printf(MSG_REGISTRO_INEXISTENTE);
+        }
+
+    } else {
+        printf(MSG_ERRO);
+    }
 }
 
 /*
@@ -2409,10 +2537,12 @@ int main() {
         case 11:
         {
             opc11(comando);
+            break;
         }
         case 12:
         {
             opc12(comando);
+            break;
         }
         case 99:
         {
