@@ -1157,7 +1157,7 @@ nomeEscola "DONIZETTI TAVARES DE LI"
 
  * @param comando
  */
-void opc5(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIteracoes) {
+void opc5(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIteracoes, int * alterado) {
     //se tem lista é uma chamada da função 13
     //entao o nome arquivo e numero de iteracoes ja vem com valores
     if (!lista) {
@@ -1317,7 +1317,8 @@ void opc5(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIte
 
                         //se for uma chamada da funcao 13 esclui da lista
                         if (lista) {
-                            listaIndRemover(lista,RRN);
+                            *alterado = 1;
+                            listaIndRemover(lista, RRN);
                         }
 
                         //verifica se deve parar
@@ -1335,16 +1336,9 @@ void opc5(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIte
             } else {
                 erro = 1;
             }
-
-
-
         }
 
-
-
         fecharArquivoBinarioEscrita(fileWb);
-
-
 
     } else {
         erro = 1;
@@ -1379,14 +1373,15 @@ void opc5(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIte
 
  * @param comando
  */
-void opc6(char * comando) {
+void opc6(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIteracoes, int *alterado) {
 
-    char * nomeArquivo = strsep(&comando, " ");
+    if (!lista) {
+        nomeArquivo = strsep(&comando, " ");
+        numeroIteracoes = atoi(strsep(&comando, "\0"));
+    }
 
     int erro = 0;
-
-    int numeroIteracoes = 0;
-    numeroIteracoes = atoi(strsep(&comando, "\0"));
+    int RRN = -1;
 
     FILE * fileWb = abrirArquivoBinarioEscritra(nomeArquivo, MODO_EDICAO);
 
@@ -1400,12 +1395,9 @@ void opc6(char * comando) {
 
 
 
-
-
         int vez;
         //for para ler os comandos a serem executados
         for (vez = 0; vez < numeroIteracoes; vez++) {
-
 
             //posiciona o ponteiro no local correo para a nova insercao
 
@@ -1413,9 +1405,13 @@ void opc6(char * comando) {
             if (topoPilha == -1) {
                 //posiciona o ponteiro pro final do arquivo
                 fseek(fileWb, 0, SEEK_END);
+
+                RRN = ftell(fileWb);
             } else {
                 //pega a posicao do registro removido
                 int posicao = topoPilha * TAMANHO_REGISTRO_DADO + TAMANHO_PAGINA;
+
+                RRN = posicao;
 
                 //soma 1 do byte de statys
                 fseek(fileWb, posicao + 1, SEEK_SET);
@@ -1564,6 +1560,11 @@ void opc6(char * comando) {
 
                 //5 = int tamanho + char tag
                 totalBytes += 5 + tamanhoEscola;
+
+
+                //adiciona na lista caso tenha nome de escola
+                listaIndInserirOrdenado(lista, nomeEscola, RRN);
+                *alterado = 1;
             }
 
 
@@ -1579,6 +1580,8 @@ void opc6(char * comando) {
             //salva o topo atual dos escluidos
             fseek(fileWb, posTopoPilha, SEEK_SET);
             fwrite(&topoPilha, sizeof (int), 1, fileWb);
+
+
         }
 
 
@@ -2400,7 +2403,7 @@ void opc12(char * comando) {
         }
 
         listaIndApagar(lista);
-        
+
     } else {
         printf(MSG_ERRO);
     }
@@ -2425,24 +2428,32 @@ void opc13(char * comando) {
     if (arqIndice) {
 
         int numeroRepeticos = atoi(strsep(&comando, "\0"));
+        int alterado = 0;
 
         LISTAINDICE * lista = carregarListaIndice(arqIndice);
         fclose(arqIndice);
 
         //realiza as operações no arquivo e na lista de indice
-        opc5("", lista, nomeArqEntrada, numeroRepeticos);
+        opc5("", lista, nomeArqEntrada, numeroRepeticos, &alterado);
 
 
-        //escreve o novo arquivo de indice
-        escreverIndicie(nomeArqIndice, lista);
+
+        //escreve o novo arquivo de indice se houve alteração
+        if (alterado) {
+            escreverIndicie(nomeArqIndice, lista);
+        }
 
         listaIndApagar(lista);
-        
+
         binarioNaTela(nomeArqIndice);
 
     } else {
         printf(MSG_ERRO);
     }
+}
+
+void opc14(char * comando) {
+    //asdasd
 }
 
 /*
@@ -2500,12 +2511,12 @@ int main() {
         }
         case 5:
         {
-            opc5(comando, NULL, "", 0);
+            opc5(comando, NULL, NULL, 0, NULL);
             break;
         }
         case 6:
         {
-            opc6(comando);
+            opc6(comando, NULL, NULL, 0, NULL);
             break;
         }
         case 7:
@@ -2541,6 +2552,11 @@ int main() {
         case 13:
         {
             opc13(comando);
+            break;
+        }
+        case 14:
+        {
+            opc14(comando);
             break;
         }
         case 99:
