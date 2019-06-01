@@ -67,7 +67,6 @@ void listaArqApagar(LISTAARQ*lista) {
         }
 
         lista->inicio = NULL;
-
     }
 }
 

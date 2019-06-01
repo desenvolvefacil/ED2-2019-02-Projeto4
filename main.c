@@ -31,6 +31,8 @@
 #define ARQUIVO_FECHADO_ESCRITA '1'
 #define MSG_ERRO "Falha no processamento do arquivo."
 #define MSG_REGISTRO_INEXISTENTE "Registro inexistente."
+#define MSG_15_SEM_INDICE "*** Realizando a busca sem o auxílio de índice\n"
+#define MSG_15_COM_INDICE "*** Realizando a busca com o auxílio de um índice secundário fortemente ligado\n"
 #define MODO_ESCRITA "wb"
 #define MODO_EDICAO "r+b"
 
@@ -42,6 +44,19 @@
 #define NOME_ESCOLA "nomeEscola"
 
 #define NULO "NULO"
+
+//imprime as msg da função 15 somente se for a primeira linha
+
+void imprimirMsg15(int * print, int comIndice) {
+    if (*print) {
+        if (comIndice) {
+            printf(MSG_15_COM_INDICE);
+        } else {
+            printf(MSG_15_SEM_INDICE);
+        }
+        *print = 0;
+    }
+}
 
 void escreverDadosEmArquivo(FILE * fileWb, int nroInscricao, double nota, char * data, int tamanhoCidade, char * cidade, int tamanhoEscola, char * nomeEscola) {
 
@@ -383,7 +398,7 @@ LISTAINDICE * carregarListaIndice(FILE * arq) {
 
         }
 
-        fclose(arq);
+        //fclose(arq);
 
         return lista;
 
@@ -566,7 +581,7 @@ FILE * abrirArquivoBinarioLeitura(char * nomeArquivo) {
 FILE * abrirArquivoBinarioEscritra(char * nomeArquivo, char * modo) {
     FILE * file = fopen(nomeArquivo, modo);
 
-    if (strncasecmp(modo, MODO_EDICAO, 3) && file) {
+    if (strncasecmp(modo, MODO_EDICAO, 3) == 0 && file) {
         char status = ARQUIVO_ABERTO_ESCRITA;
 
         //le o primeiro char para verificar a integridade
@@ -958,13 +973,13 @@ void opc2(char * comando) {
  * Entrada Modelo: 3 arquivoTrab1si.bin nomeEscola FRANCISCO RIBEIRO CARRI
  * @param comando
  */
-void opc3(char * comando) {
+int opc3(char * nomeArquivo, char * parametroNome, char * parametroValor, int isCompare) {
 
-    char * nomeArquivo = strsep(&comando, " ");
+    /*char * nomeArquivo = strsep(&comando, " ");
 
     char * parametroNome = strsep(&comando, " ");
 
-    char * parametroValor = strsep(&comando, "\0");
+    char * parametroValor = strsep(&comando, "\0");*/
 
     int erro = 0;
     int imprimiu = 0;
@@ -1003,6 +1018,8 @@ void opc3(char * comando) {
                             int nroAux = atoi(parametroValor);
 
                             if (nroInscricao == nroAux) {
+                                imprimirMsg15(&isCompare, 0);
+
                                 imprimirLinhaEmTela(nroInscricao, nota, data, cidade, nomeEscola);
                                 imprimiu = 1;
                                 vez += 2;
@@ -1014,6 +1031,8 @@ void opc3(char * comando) {
                             double notaAux = strtod(parametroValor, NULL);
 
                             if (notaAux >= 0 && notaAux == nota) {
+                                imprimirMsg15(&isCompare, 0);
+
                                 imprimirLinhaEmTela(nroInscricao, nota, data, cidade, nomeEscola);
                                 imprimiu = 1;
                             }
@@ -1021,6 +1040,8 @@ void opc3(char * comando) {
 
                         if (strcasecmp(parametroNome, DATA) == 0) {
                             if (strcasecmp(parametroValor, data) == 0) {
+                                imprimirMsg15(&isCompare, 0);
+
                                 imprimirLinhaEmTela(nroInscricao, nota, data, cidade, nomeEscola);
                                 imprimiu = 1;
                             }
@@ -1028,6 +1049,8 @@ void opc3(char * comando) {
 
                         if (strcasecmp(parametroNome, CIDADE) == 0) {
                             if (strcasecmp(parametroValor, cidade) == 0) {
+                                imprimirMsg15(&isCompare, 0);
+
                                 imprimirLinhaEmTela(nroInscricao, nota, data, cidade, nomeEscola);
                                 imprimiu = 1;
                             }
@@ -1035,6 +1058,8 @@ void opc3(char * comando) {
 
                         if (strcasecmp(parametroNome, NOME_ESCOLA) == 0) {
                             if (strcasecmp(parametroValor, nomeEscola) == 0) {
+                                imprimirMsg15(&isCompare, 0);
+
                                 imprimirLinhaEmTela(nroInscricao, nota, data, cidade, nomeEscola);
                                 imprimiu = 1;
                             }
@@ -1059,6 +1084,8 @@ void opc3(char * comando) {
                 totalPaginasAcessadas += (diff > 0) ? 1 : 0;
 
                 printf("Número de páginas de disco acessadas: %d", totalPaginasAcessadas);
+
+                return totalPaginasAcessadas;
             } else {
                 printf(MSG_REGISTRO_INEXISTENTE);
             }
@@ -1076,6 +1103,8 @@ void opc3(char * comando) {
     if (erro) {
         printf(MSG_ERRO);
     }
+
+    return 0;
 }
 
 /**
@@ -1157,14 +1186,7 @@ nomeEscola "DONIZETTI TAVARES DE LI"
 
  * @param comando
  */
-void opc5(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIteracoes, int * alterado) {
-    //se tem lista é uma chamada da função 13
-    //entao o nome arquivo e numero de iteracoes ja vem com valores
-    if (!lista) {
-        nomeArquivo = strsep(&comando, " ");
-
-        numeroIteracoes = atoi(strsep(&comando, "\0"));
-    }
+void opc5(LISTAINDICE * lista, char * nomeArquivo, int numeroIteracoes, int * alterado) {
 
     int erro = 0;
 
@@ -1184,7 +1206,7 @@ void opc5(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIte
         for (vez = 0; vez < numeroIteracoes; vez++) {
 
             //le uma nova linha
-            comando = lerComando();
+            char * comando = lerComando();
 
             //pega o campo a ser comparado
             char * parametroNome = strsep(&comando, " ");
@@ -1406,12 +1428,12 @@ void opc6(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIte
                 //posiciona o ponteiro pro final do arquivo
                 fseek(fileWb, 0, SEEK_END);
 
-                RRN = ftell(fileWb);
+                RRN = (ftell(fileWb) - TAMANHO_PAGINA) / TAMANHO_REGISTRO_DADO;
             } else {
                 //pega a posicao do registro removido
                 int posicao = topoPilha * TAMANHO_REGISTRO_DADO + TAMANHO_PAGINA;
 
-                RRN = posicao;
+                RRN = topoPilha;
 
                 //soma 1 do byte de statys
                 fseek(fileWb, posicao + 1, SEEK_SET);
@@ -1563,8 +1585,10 @@ void opc6(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIte
 
 
                 //adiciona na lista caso tenha nome de escola
-                listaIndInserirOrdenado(lista, nomeEscola, RRN);
-                *alterado = 1;
+                if (lista) {
+                    listaIndInserirOrdenado(lista, nomeEscola, RRN);
+                    *alterado = 1;
+                }
             }
 
 
@@ -1597,7 +1621,10 @@ void opc6(char * comando, LISTAINDICE * lista, char * nomeArquivo, int numeroIte
     if (erro) {
         printf(MSG_ERRO);
     } else {
-        binarioNaTela(nomeArquivo);
+        //imprime somente se não tem lista de indice
+        if (!lista) {
+            binarioNaTela(nomeArquivo);
+        }
     }
 }
 
@@ -2336,15 +2363,15 @@ void opc11(char * comando) {
 
  * @param comando
  */
-void opc12(char * comando) {
-    char * nomeArqEntrada = strsep(&comando, " ");
+int opc12(char * nomeArqEntrada, char * nomeArqIndice, char * parametroValor, int isCompare) {
+    /*char * nomeArqEntrada = strsep(&comando, " ");
     char * nomeArqIndice = strsep(&comando, " ");
 
-    char * parametroNome = strsep(&comando, " ");
+    //char * parametroNome = strsep(&comando, " ");
     char * parametroValor = strsep(&comando, "\"");
     if (strcmp(parametroValor, "") == 0) {
         parametroValor = strsep(&comando, "\"");
-    }
+    }*/
 
     FILE * arqEntrada = abrirArquivoBinarioLeitura(nomeArqEntrada);
     FILE * arqIndice = abrirArquivoBinarioLeitura(nomeArqIndice);
@@ -2385,6 +2412,8 @@ void opc12(char * comando) {
                 if (lerLinha(arqEntrada, aux->RRN, &removido, &nroInscricao, &nota, data, &tamanhoCidade, cidade, &tamanhoEscola, nomeEscola)) {
                     //se o registro não esta removido logicamente
                     if (removido == NAO_REMOVIDO) {
+                        imprimirMsg15(&isCompare, 1);
+
                         imprimirLinhaEmTela(nroInscricao, nota, data, cidade, nomeEscola);
                         totalPaginaDados++;
                     }
@@ -2398,6 +2427,8 @@ void opc12(char * comando) {
         if (totalPaginaDados > 1) {
             printf("Número de páginas de disco para carregar o arquivo de índice: %d\n", totalPaginasIndice);
             printf("Número de páginas de disco para acessar o arquivo de dados: %d", totalPaginaDados);
+
+            return (totalPaginaDados);
         } else {
             printf(MSG_REGISTRO_INEXISTENTE);
         }
@@ -2407,6 +2438,8 @@ void opc12(char * comando) {
     } else {
         printf(MSG_ERRO);
     }
+
+    return 0;
 }
 
 /**
@@ -2428,22 +2461,25 @@ void opc13(char * comando) {
     if (arqIndice) {
 
         int numeroRepeticos = atoi(strsep(&comando, "\0"));
-        int alterado = 0;
 
-        LISTAINDICE * lista = carregarListaIndice(arqIndice);
-        fclose(arqIndice);
+        if (numeroRepeticos > 0) {
 
-        //realiza as operações no arquivo e na lista de indice
-        opc5("", lista, nomeArqEntrada, numeroRepeticos, &alterado);
+            int alterado = 0;
 
+            LISTAINDICE * lista = carregarListaIndice(arqIndice);
+            fclose(arqIndice);
 
+            //realiza as operações no arquivo e na lista de indice
+            opc5(lista, nomeArqEntrada, numeroRepeticos, &alterado);
 
-        //escreve o novo arquivo de indice se houve alteração
-        if (alterado) {
-            escreverIndicie(nomeArqIndice, lista);
+            //escreve o novo arquivo de indice se houve alteração
+            if (alterado) {
+                escreverIndicie(nomeArqIndice, lista);
+            }
+
+            listaIndApagar(lista);
+
         }
-
-        listaIndApagar(lista);
 
         binarioNaTela(nomeArqIndice);
 
@@ -2452,8 +2488,99 @@ void opc13(char * comando) {
     }
 }
 
+/**
+ * Insere novos registros e atualiza o indice
+ * 
+ * Entrada Modelo
+ 
+14 file1.bin file1ind.bin 3
+968392 NULO "03/05/1991" "Uberlandia" NULO
+2210806 200.1 NULO NULO "ALZIRA BORGES SOLTO"
+1987377 665.1 "27/05/1989" "Iturama" "ZULMIRA DE OLIVEIRA PRO"
+
+ * @param comando
+ */
 void opc14(char * comando) {
-    //asdasd
+    char * nomeArqEntrada = strsep(&comando, " ");
+    char * nomeArqIndice = strsep(&comando, " ");
+
+    FILE * arqIndice = abrirArquivoBinarioLeitura(nomeArqIndice);
+
+    if (arqIndice) {
+
+        int numeroRepeticos = atoi(strsep(&comando, "\0"));
+
+        if (numeroRepeticos > 0) {
+
+            int alterado = 0;
+
+            LISTAINDICE * lista = carregarListaIndice(arqIndice);
+            fclose(arqIndice);
+
+            //realiza as operações no arquivo e na lista de indice
+            opc6("", lista, nomeArqEntrada, numeroRepeticos, &alterado);
+
+
+
+            //escreve o novo arquivo de indice se houve alteração
+            if (alterado) {
+                escreverIndicie(nomeArqIndice, lista);
+            }
+
+            listaIndApagar(lista);
+        }
+
+        binarioNaTela(nomeArqIndice);
+
+    } else {
+        printf(MSG_ERRO);
+    }
+}
+
+/**
+ * Faz a comparação e diferença das funcções 3 e 12
+ * Entrada Modelo:
+ 
+15 file3.bin file3ind.bin nomeEscola "WALT DISNEY"
+ 
+15 file6.bin file6ind.bin nomeEscola "OLEGARIO TUPINAMBA"
+
+ * @param comando
+ */
+void opc15(char * comando) {
+    char * nomeArqEntrada = strsep(&comando, " ");
+    char * nomeArqIndice = strsep(&comando, " ");
+
+    //verifica se existem os arquivos e se estão ok
+
+    FILE * arqEntrada = abrirArquivoBinarioLeitura(nomeArqEntrada);
+    FILE * arqIndice = abrirArquivoBinarioLeitura(nomeArqIndice);
+
+    if (arqEntrada && arqIndice) {
+        //fecha os arquivos para que possam ser utilizados nas funções
+        fclose(arqEntrada);
+        fclose(arqIndice);
+
+        char * parametroNome = strsep(&comando, " ");
+        char * parametroValor = strsep(&comando, "\"");
+        if (strcmp(parametroValor, "") == 0) {
+            parametroValor = strsep(&comando, "\"");
+        }
+
+
+        //chama a função 3
+        int totalF3 = opc3(nomeArqEntrada, parametroNome, parametroValor, 1);
+
+        if (totalF3) {
+            printf("\n\n");
+            //chama a função12
+            int totalF12 = opc12(nomeArqEntrada, nomeArqIndice, parametroValor, 1);
+
+            printf("\n\nDiferença no número de páginas de disco acessadas: %d", (totalF3 - totalF12));
+        }
+    } else {
+        printf(MSG_ERRO);
+    }
 }
 
 /*
@@ -2501,7 +2628,11 @@ int main() {
         }
         case 3:
         {
-            opc3(comando);
+            char * nomeArquivo = strsep(&comando, " ");
+            char * parametroNome = strsep(&comando, " ");
+            char * parametroValor = strsep(&comando, "\0");
+
+            opc3(nomeArquivo, parametroNome, parametroValor, 0);
             break;
         }
         case 4:
@@ -2511,7 +2642,12 @@ int main() {
         }
         case 5:
         {
-            opc5(comando, NULL, NULL, 0, NULL);
+
+            char * nomeArquivo = strsep(&comando, " ");
+
+            int numeroIteracoes = atoi(strsep(&comando, "\0"));
+
+            opc5(NULL, nomeArquivo, numeroIteracoes, NULL);
             break;
         }
         case 6:
@@ -2546,7 +2682,16 @@ int main() {
         }
         case 12:
         {
-            opc12(comando);
+            char * nomeArqEntrada = strsep(&comando, " ");
+            char * nomeArqIndice = strsep(&comando, " ");
+
+            char * parametroNome = strsep(&comando, " ");
+            char * parametroValor = strsep(&comando, "\"");
+            if (strcmp(parametroValor, "") == 0) {
+                parametroValor = strsep(&comando, "\"");
+            }
+
+            opc12(nomeArqEntrada, nomeArqIndice, parametroValor, 0);
             break;
         }
         case 13:
@@ -2557,6 +2702,11 @@ int main() {
         case 14:
         {
             opc14(comando);
+            break;
+        }
+        case 15:
+        {
+            opc15(comando);
             break;
         }
         case 99:
