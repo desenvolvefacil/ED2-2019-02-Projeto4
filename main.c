@@ -2388,6 +2388,9 @@ int opc12(char * nomeArqEntrada, char * nomeArqIndice, char * parametroValor, in
         //começa contando com o arquivo de cabeçalho
         int totalPaginaDados = 1;
 
+        //ultima pagina aberta
+        int ultimaPagina = -10;
+
         //realiza a busca e imprime
         NOIND * aux = lista->inicio;
         while (aux != NULL && strncasecmp(aux->chave, parametroValor, 28) <= 0) {
@@ -2415,7 +2418,17 @@ int opc12(char * nomeArqEntrada, char * nomeArqIndice, char * parametroValor, in
                         imprimirMsg15(&isCompare, 1);
 
                         imprimirLinhaEmTela(nroInscricao, nota, data, cidade, nomeEscola);
-                        totalPaginaDados++;
+
+                        //pega a pagina atual do registro
+                        int paginaAtual = (aux->RRN * TAMANHO_REGISTRO_DADO) / TAMANHO_PAGINA;
+
+                        //soma somente se não abriu uma nova pagina
+                        if (ultimaPagina != paginaAtual) {
+                            totalPaginaDados++;
+                        } 
+                        
+                        ultimaPagina = paginaAtual;
+                        
                     }
                 }
 
