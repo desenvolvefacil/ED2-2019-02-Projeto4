@@ -2600,7 +2600,16 @@ void opc15(char * comando) {
  * Função Principal
  */
 int main() {
-
+/*
+     FILE * arqIndice = abrirArquivoBinarioLeitura("file3ind.bin");
+     LISTAINDICE * lista = carregarListaIndice(arqIndice);
+     
+     listaIndImprimir(lista);
+     
+     fclose(arqIndice);
+    
+    exit(0);
+    */
     //comando a ser lido
     char * comando = calloc(100, sizeof (char));
     //strcpy(comando,"3 arquivoTrab1si.bin nomeEscola FRANCISCO RIBEIRO CARRI\0");
